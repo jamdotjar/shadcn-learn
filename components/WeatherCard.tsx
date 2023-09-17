@@ -3,12 +3,12 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { useEffect, useState } from "react";
 
-function WeatherDisplay() {
+export function WeatherDisplay() {
     const [weatherData, setWeatherData] = useState(null)
     useEffect(()=>{
         const getWeather =async () => 
         {
-            const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=49.3164&longitude=-123.0693&hourly=precipitation_probability&current_weather=true&timeformat=unixtime&timezone=America%2FLos_Angeles&forecast_days=1")
+            const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=49.3164&longitude=-123.0693&hourly=temperature_2m,relativehumidity_2m,apparent_temperature,precipitation_probability,precipitation&current_weather=true")
             const data = await res.json()
             console.log(data)
             setWeatherData(data)
@@ -19,31 +19,42 @@ function WeatherDisplay() {
         return(
             <>
              {weatherData ? (
-                <div className="flex flex-wrap ">
-                    <div className="p-4 md:w-1/3 sm:w-full">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Temperature</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <CardDescription>
-                                    {weatherData.current_weather.temperature}°
-                                </CardDescription>
-                            </CardContent>
-                        </Card>
-                    </div>
-                    <div className="p-4 md:w-1/3 sm:w-full">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Precipitation Probability</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <CardDescription>
-                                    {weatherData.hourly.precipitation_probability[weatherData.hourly.precipitation_probability.length - 1]} per-cent chance of precipitation
-                                </CardDescription>
-                            </CardContent>
-                        </Card>
-                    </div>
+                <div className="flex flex-wrap">
+                   <Card className="m-2 text-center">
+                    <CardHeader>
+                        <CardTitle>
+                          Temperature
+                        </CardTitle>
+                        
+                    </CardHeader>
+                        <CardContent>
+                            <div className="text-5xl"> {weatherData?.current_weather?.temperature}°</div>
+                          
+                            <div className="text-2xl text-light text-gray-600">feels like: {weatherData?.current_weather?.temperature}</div>
+                        </CardContent>
+                    </Card>
+                    <Card className="m-2">
+                    <CardHeader>
+                        <CardTitle>
+                          Temperature
+                        </CardTitle>
+                        
+                    </CardHeader>
+                        <CardContent>
+                            enough to MELT your socks offx
+                        </CardContent>
+                    </Card>
+                    <Card className="m-2">
+                    <CardHeader>
+                        <CardTitle>
+                          Temperature
+                        </CardTitle>
+                        
+                    </CardHeader>
+                        <CardContent>
+                            enough to MELT your socks offx
+                        </CardContent>
+                    </Card>
                 </div>
 
             ) : (
@@ -55,13 +66,3 @@ function WeatherDisplay() {
     
 }
 
-export default function WeatherCard() {
-
-    return (
-        
-            <WeatherDisplay/>
-          
-
-        
-      )
-}
