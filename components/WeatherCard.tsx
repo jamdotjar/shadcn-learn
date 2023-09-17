@@ -30,7 +30,7 @@ export function WeatherDisplay() {
                         <CardContent>
                             <div className="text-5xl"> {weatherData?.current_weather?.temperature}°</div>
                           
-                            <div className="text-2xl text-light text-gray-600">feels like: {weatherData?.current_weather?.temperature}</div>
+                            <div className="text-l font-light text-gray-600">Feels like: {weatherData?.current_weather?.temperature}°</div>
                         </CardContent>
                     </Card>
                     <Card className="m-2">
