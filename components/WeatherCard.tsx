@@ -3,23 +3,34 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { useEffect, useState } from "react";
 
+function getHourlyParameter(weatherData, parameter, hour) {
+    return weatherData.hourly[parameter][hour];
+}
+
 export function WeatherDisplay() {
     const [weatherData, setWeatherData] = useState(null)
+
     useEffect(()=>{
+        
         const getWeather =async () => 
         {
-            const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=49.3164&longitude=-123.0693&hourly=temperature_2m,relativehumidity_2m,apparent_temperature,precipitation_probability,precipitation&current_weather=true")
+            const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=49.3164&longitude=-123.0693&hourly=temperature_2m,relativehumidity_2m,apparent_temperature,precipitation_probability,precipitation&current_weather=true&timezone=America%2FLos_Angeles&forecast_days=3")
             const data = await res.json()
             console.log(data)
             setWeatherData(data)
+            
         }
         getWeather()
 }, [])
-    
+const currentHour = new Date().getHours();
+
+
         return(
+            
             <>
              {weatherData ? (
-                <div className="flex flex-wrap">
+                
+                <div  className="flex flex-wrap">
                    <Card className="m-2 text-center">
                     <CardHeader>
                         <CardTitle>
@@ -29,8 +40,8 @@ export function WeatherDisplay() {
                     </CardHeader>
                         <CardContent>
                             <div className="text-5xl"> {weatherData?.current_weather?.temperature}°</div>
-                          
-                            <div className="text-l font-light text-gray-600">Feels like: {weatherData?.current_weather?.temperature}°</div>
+
+<div className="text-l font-light text-gray-600">Feels like: {getHourlyParameter(weatherData, 'apparent_temperature', currentHour)}°</div>
                         </CardContent>
                     </Card>
                     <Card className="m-2">
