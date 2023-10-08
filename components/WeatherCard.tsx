@@ -56,14 +56,14 @@ export function WeatherDisplay() {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     setLocation({lat, lon});
-                    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relativehumidity_2m,apparent_temperature,precipitation_probability,precipitation&current_weather=true&timezone=America%2FLos_Angeles&forecast_days=3`)
+                    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relativehumidity_2m,weathercode,apparent_temperature,precipitation_probability,precipitation&current_weather=true&timezone=America%2FLos_Angeles&forecast_days=3`)
                     const data = await res.json()
                     console.log(data)
                     setWeatherData(data)
                 });
             }
             else{
-                const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=49.3164&longitude=-123.0693&hourly=temperature_2m,relativehumidity_2m,apparent_temperature,precipitation_probability,precipitation&current_weather=true&timezone=America%2FLos_Angeles&forecast_days=3")
+                const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=49.3164&longitude=-123.0693&hourly=temperature_2m,relativehumidity_2m,weathercode,apparent_temperature,precipitation_probability,precipitation&current_weather=true&timezone=America%2FLos_Angeles&forecast_days=3")
                 const data = await res.json()
                 console.log(data)
                 setWeatherData(data)
@@ -97,6 +97,11 @@ for (let i = 0; i < 12; i++) {
     }
     forecastData.push({ time, temperature });
 }
+const weatherCodeMapping = {
+     0: 'Clear', 1: 'Partly cloudy', 2: 'Cloudy', 3: 'Overcast', 10: 'Mist', 21: 'Patchy rain possible', 22: 'Patchy snow possible', 23: 'Patchy sleet possible', 24: 'Patchy freezing drizzle possible', 29: 'Thundery outbreaks possible', 38: 'Blowing snow', 39: 'Blizzard', 45: 'Fog', 49: 'Freezing fog', 50: 'Patchy light drizzle', 51: 'Light drizzle', 56: 'Freezing drizzle', 57: 'Heavy freezing drizzle', 60: 'Patchy light rain', 61: 'Light rain', 62: 'Moderate rain at times', 63: 'Moderate rain', 64: 'Heavy rain at times', 65: 'Heavy rain', 66: 'Light freezing rain', 67: 'Moderate or heavy freezing rain', 68: 'Light sleet', 69: 'Moderate or heavy sleet', 70: 'Patchy light snow', 71: 'Light snow', 72: 'Patchy moderate snow', 73: 'Moderate snow', 74: 'Patchy heavy snow', 75: 'Heavy snow', 79: 'Ice pellets', 80: 'Light rain shower', 81: 'Moderate or heavy rain shower', 82: 'Torrential rain shower', 83: 'Light sleet showers', 84: 'Moderate or heavy sleet showers', 85: 'Light snow showers', 86: 'Moderate or heavy snow showers', 87: 'Light showers of ice pellets', 88: 'Moderate or heavy showers of ice pellets', 91: 'Patchy light rain with thunder', 92: 'Moderate or heavy rain with thunder', 93: 'Patchy light snow with thunder', 94: 'Moderate or heavy snow with thunder' 
+    };
+
+const currentWeatherCondition = weatherCodeMapping[weatherData?.current_weather?.weathercode];
 
         return(
             
@@ -106,13 +111,13 @@ for (let i = 0; i < 12; i++) {
                 <>
                {location.city}
                 <div  className="flex flex-wrap">
-                   <Card className="m-2 text-center">
-                    <CardHeader>
-                        <CardTitle>
-                          Temperature
-                        </CardTitle>
-                        
-                    </CardHeader>
+                    <Card className="m-2 text-center">
+                        <CardHeader>
+                            <CardTitle>
+                            Temperature
+                            </CardTitle>
+                            
+                        </CardHeader>
                         <CardContent>
                             <div className="text-5xl dark:text-accent"> {weatherData?.current_weather?.temperature}°</div>
                                 {weatherData?.current_weather?.temperature !== getHourlyParameter(weatherData, 'apparent_temperature', currentHour) && 
@@ -144,7 +149,7 @@ for (let i = 0; i < 12; i++) {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="flex-stack justify-center">
-                            
+                           {currentWeatherCondition}
                             <img src="/sun.svg" alt="Weather icon" className="mx-auto" />
                         </CardContent>
                     </Card>
