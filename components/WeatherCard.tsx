@@ -4,6 +4,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useEffect, useState } from "react";
 import { LineChart, Line, CartesianGrid,Area, XAxis, YAxis, Tooltip, AreaChart } from 'recharts';
 
+import { useSpring, animated, config } from 'react-spring';
+
+
 function getHourlyParameter(weatherData, parameter, hour) {
     return weatherData.hourly[parameter][hour];
 }
@@ -21,9 +24,27 @@ function CustomTooltip({ payload, label, active }) {
 }
 
 export function WeatherDisplay() {
+
+
     const [weatherData, setWeatherData] = useState(null)
     const [location, setLocation] = useState({lat: null, lon: null})
 
+
+    const svgs = ['/cloud.svg', '/sun.svg', '/cloud-rain.svg'];
+    const [index, setIndex] = useState(0);
+    const props = useSpring({
+      from: { opacity: 0, transform: 'rotate(180deg)' },
+      to: async (next) => {
+        while (1) {
+          await next({ opacity: 1, transform: 'rotate(0deg)', config: config.gentle });
+          setIndex((index + 1) % svgs.length); // Change SVG mid-spin
+          await next({ opacity: 1, transform: 'rotate(180deg)', config: config.wobbly }); // Icons are right way up during the pause
+          await new Promise(r => setTimeout(r, 1000)); // Add delay between spins
+        }
+      },
+      reset: true,
+    });
+  
     
     useEffect(()=>{
         
@@ -116,6 +137,17 @@ for (let i = 0; i < 12; i++) {
                             <div className="text-l font-light text-gray-600 dark:text-accent">Chance of precipitation</div>
                         </CardContent>
                     </Card>
+                    <Card className="m-2 text-center">
+                        <CardHeader>
+                            <CardTitle>
+                             Weather
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-stack justify-center">
+                            
+                            <img src="/sun.svg" alt="Weather icon" className="mx-auto" />
+                        </CardContent>
+                    </Card>
                     <Card className="m-2">
                     <CardHeader>
                         <CardTitle>
@@ -138,8 +170,15 @@ for (let i = 0; i < 12; i++) {
                 </div>
                 </>
 
-            ) : (~
-                    <div>Loading...</div>
+            ) : (
+            <div className=" flex justify-center items-center h-screen">
+                <animated.div style={props} className="">
+                <img src={svgs[index % svgs.length]} alt="loading" />
+                
+                </animated.div>
+                <div className="text-xl m-5">
+              Loading...</div>
+              </div>
             )}
             </>
         )
