@@ -101,8 +101,58 @@ const weatherCodeMapping = {
      0: 'Clear', 1: 'Partly cloudy', 2: 'Cloudy', 3: 'Overcast', 10: 'Mist', 21: 'Patchy rain possible', 22: 'Patchy snow possible', 23: 'Patchy sleet possible', 24: 'Patchy freezing drizzle possible', 29: 'Thundery outbreaks possible', 38: 'Blowing snow', 39: 'Blizzard', 45: 'Fog', 49: 'Freezing fog', 50: 'Patchy light drizzle', 51: 'Light drizzle', 56: 'Freezing drizzle', 57: 'Heavy freezing drizzle', 60: 'Patchy light rain', 61: 'Light rain', 62: 'Moderate rain at times', 63: 'Moderate rain', 64: 'Heavy rain at times', 65: 'Heavy rain', 66: 'Light freezing rain', 67: 'Moderate or heavy freezing rain', 68: 'Light sleet', 69: 'Moderate or heavy sleet', 70: 'Patchy light snow', 71: 'Light snow', 72: 'Patchy moderate snow', 73: 'Moderate snow', 74: 'Patchy heavy snow', 75: 'Heavy snow', 79: 'Ice pellets', 80: 'Light rain shower', 81: 'Moderate or heavy rain shower', 82: 'Torrential rain shower', 83: 'Light sleet showers', 84: 'Moderate or heavy sleet showers', 85: 'Light snow showers', 86: 'Moderate or heavy snow showers', 87: 'Light showers of ice pellets', 88: 'Moderate or heavy showers of ice pellets', 91: 'Patchy light rain with thunder', 92: 'Moderate or heavy rain with thunder', 93: 'Patchy light snow with thunder', 94: 'Moderate or heavy snow with thunder' 
     };
 
+    const weatherCodeToImageMapping = {
+        0: '/sun.svg', // Clear
+        1: '/cloud.svg', // Partly cloudy
+        2: '/cloud.svg', // Cloudy
+        3: '/cloud.svg', // Overcast
+        10: '/cloud-drizzle.svg', // Mist
+        21: '/cloud-drizzle.svg', // Patchy rain possible
+        22: '/cloud-snow.svg', // Patchy snow possible
+        23: '/cloud-snow.svg', // Patchy sleet possible
+        24: '/cloud-drizzle.svg', // Patchy freezing drizzle possible
+        29: '/cloud-rain.svg', // Thundery outbreaks possible
+        38: '/cloud-snow.svg', // Blowing snow
+        39: '/cloud-snow.svg', // Blizzard
+        45: '/cloud.svg', // Fog
+        49: '/cloud.svg', // Freezing fog
+        50: '/cloud-drizzle.svg', // Patchy light drizzle
+        51: '/cloud-drizzle.svg', // Light drizzle
+        56: '/cloud-drizzle.svg', // Freezing drizzle
+        57: '/cloud-rain.svg', // Heavy freezing drizzle
+        60: '/cloud-drizzle.svg', // Patchy light rain
+        61: '/cloud-rain.svg', // Light rain
+        62: '/cloud-rain.svg', // Moderate rain at times
+        63: '/cloud-rain.svg', // Moderate rain
+        64: '/cloud-rain.svg', // Heavy rain at times
+        65: '/cloud-rain.svg', // Heavy rain
+        66: '/cloud-drizzle.svg', // Light freezing rain
+        67: '/cloud-rain.svg', // Moderate or heavy freezing rain
+        68: '/cloud-snow.svg', // Light sleet
+        69: '/cloud-snow.svg', // Moderate or heavy sleet
+        70: '/cloud-snow.svg', // Patchy light snow
+        71: '/cloud-snow.svg', // Light snow
+        72: '/cloud-snow.svg', // Patchy moderate snow
+        73: '/cloud-snow.svg', // Moderate snow
+        74: '/cloud-snow.svg', // Patchy heavy snow
+        75: '/cloud-snow.svg', // Heavy snow
+        79: '/cloud-snow.svg', // Ice pellets
+        80: '/cloud-rain.svg', // Light rain shower
+        81: '/cloud-rain.svg', // Moderate or heavy rain shower
+        82: '/cloud-rain.svg', // Torrential rain shower
+        83: '/cloud-snow.svg', // Light sleet showers
+        84: '/cloud-snow.svg', // Moderate or heavy sleet showers
+        85: '/cloud-snow.svg', // Light snow showers
+        86: '/cloud-snow.svg', // Moderate or heavy snow showers
+        87: '/cloud-snow.svg', // Light showers of ice pellets
+        88: '/cloud-snow.svg', // Moderate or heavy showers of ice pellets
+        91: '/cloud-rain.svg', // Patchy light rain with thunder
+        92: '/cloud-rain.svg', // Moderate or heavy rain with thunder
+        93: '/cloud-snow.svg', // Patchy light snow with thunder
+        94: '/cloud-snow.svg' // Moderate or heavy snow with thunder
+    };
 const currentWeatherCondition = weatherCodeMapping[weatherData?.current_weather?.weathercode];
-
+const currentWeatherImage = weatherCodeToImageMapping[weatherData?.current_weather?.weathercode];
         return(
             
             <>
@@ -150,7 +200,7 @@ const currentWeatherCondition = weatherCodeMapping[weatherData?.current_weather?
                         </CardHeader>
                         <CardContent className="flex-stack justify-center">
                            {currentWeatherCondition}
-                            <img src="/sun.svg" alt="Weather icon" className="mx-auto" />
+                            <img src={currentWeatherImage} alt="Weather icon" className="mx-auto" />
                         </CardContent>
                     </Card>
                     <Card className="m-2">
