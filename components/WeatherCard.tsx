@@ -5,16 +5,23 @@ import { useEffect, useState } from "react";
 import { LineChart, Line, CartesianGrid,Area, XAxis, YAxis, Tooltip, AreaChart } from 'recharts';
 
 import { useSpring, animated, config } from 'react-spring';
+import Image from "next/image";
 
 
-function getHourlyParameter(weatherData, parameter, hour) {
+function getHourlyParameter(weatherData: WeatherData, parameter: keyof WeatherData['hourly'], hour: number) {
     return weatherData.hourly[parameter][hour];
 }
 
-function CustomTooltip({ payload, label, active }) {
+interface TooltipProps {
+    payload: any[];
+    label: string;
+    active: boolean;
+}
+
+function CustomTooltip({ payload, label, active }: TooltipProps) {
     if (active && payload && payload.length) {
         return (
-            <div className="custom-tooltip">
+            <div className="custom-tooltip rounded-lg">
                 <p className="label">{`${label} : ${payload[0].value}°`}</p>
             </div>
         );
@@ -22,12 +29,56 @@ function CustomTooltip({ payload, label, active }) {
 
     return null;
 }
+type WeatherData = {
+    latitude: number;
+    longitude: number;
+    generationtime_ms: number;
+    utc_offset_seconds: number;
+    timezone: string;
+    timezone_abbreviation: string;
+    elevation: number;
+    current_weather_units: {
+      time: string;
+      temperature: string;
+      windspeed: string;
+      winddirection: string;
+      is_day: string;
+      weathercode: string;
+    };
+    current_weather_interval_seconds: number;
+    current_weather: {
+      time: string;
+      temperature: number;
+      windspeed: number;
+      winddirection: number;
+      is_day: number;
+      weathercode: number;
+    };
+    hourly_units: {
+      time: string;
+      temperature_2m: string;
+      relativehumidity_2m: string;
+      weathercode: string;
+      apparent_temperature: string;
+      precipitation_probability: string;
+      precipitation: string;
+    };
+    hourly: {
+      time: string[];
+      temperature_2m: number[];
+      relativehumidity_2m: number[];
+      weathercode: number[];
+      apparent_temperature: number[];
+      precipitation_probability: number[];
+      precipitation: number[];
+    };
+  };
 
 export function WeatherDisplay() {
 
 
-    const [weatherData, setWeatherData] = useState(null)
-    const [location, setLocation] = useState({lat: null, lon: null})
+    const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+    const [location, setLocation] = useState<{lat: number | null, lon: number | null, city?: string}>({lat: null, lon: null})
 
 
     const svgs = ['/cloud.svg', '/sun.svg', '/cloud-rain.svg'];
@@ -46,7 +97,7 @@ export function WeatherDisplay() {
     });
   
     
-    useEffect(()=>{
+    useEffect(()=> {
         
         const getWeather =async () => 
         {
@@ -74,7 +125,7 @@ export function WeatherDisplay() {
         getWeather()
 }, [])
 useEffect(() => {
-    const getCityName = async (lat, lon) => {
+    const getCityName = async (lat: number, lon: number) => {
         const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
         const data = await response.json();
         return data.address.city;
@@ -151,8 +202,8 @@ const weatherCodeMapping = {
         93: '/cloud-snow.svg', // Patchy light snow with thunder
         94: '/cloud-snow.svg' // Moderate or heavy snow with thunder
     };
-const currentWeatherCondition = weatherCodeMapping[weatherData?.current_weather?.weathercode];
-const currentWeatherImage = weatherCodeToImageMapping[weatherData?.current_weather?.weathercode];
+const currentWeatherCondition = weatherCodeMapping[weatherData?.current_weather?.weathercode as keyof typeof weatherCodeMapping];
+const currentWeatherImage = weatherCodeToImageMapping[weatherData?.current_weather?.weathercode as keyof typeof weatherCodeToImageMapping];
         return(
             
             <>
@@ -200,7 +251,7 @@ const currentWeatherImage = weatherCodeToImageMapping[weatherData?.current_weath
                         </CardHeader>
                         <CardContent className="flex-stack justify-center">
                            {currentWeatherCondition}
-                            <img src={currentWeatherImage} alt="Weather icon" className="mx-auto" />
+                            <Image src={currentWeatherImage} alt="Weather icon" className="mx-auto" width={76} height={76} />
                         </CardContent>
                     </Card>
                     <Card className="m-2">
@@ -228,7 +279,7 @@ const currentWeatherImage = weatherCodeToImageMapping[weatherData?.current_weath
             ) : (
             <div className=" flex justify-center items-center h-screen">
                 <animated.div style={props} className="">
-                <img src={svgs[index % svgs.length]} alt="loading" />
+                <Image src={svgs[index % svgs.length]} alt="loading" width={76} height={76}/>
                 
                 </animated.div>
                 <div className="text-xl m-5">

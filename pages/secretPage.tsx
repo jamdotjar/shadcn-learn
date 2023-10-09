@@ -2,7 +2,8 @@ import { getSession, useSession } from 'next-auth/react'
 import { GetServerSideProps } from 'next'
 import 'components/globals.css'
 import Header from '@/components/Header'
-export default function secretPage() {
+
+export default function SecretPage() {
   const { data: session } = useSession()
 
   if (!session) {
