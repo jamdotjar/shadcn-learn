@@ -110,7 +110,7 @@ const currentWeatherCondition = weatherCodeMapping[weatherData?.current_weather?
              {weatherData ? (
                 <>
                {location.city}
-                <div  className="flex flex-wrap">
+                <div className="flex flex-wrap justify-center">
                     <Card className="m-2 text-center">
                         <CardHeader>
                             <CardTitle>

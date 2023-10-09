@@ -13,7 +13,7 @@ export default function Header() {
             ) : (
             <Link href="/login" className="hover:font-bold">Login</Link>
             )}
-            <Link href="secretPage" className="hover:font-bold">SEcrET</Link>
+            <Link href="secretPage" className="hover:font-bold">Account</Link>
 
         </div>
     </div>
