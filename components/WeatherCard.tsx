@@ -96,7 +96,6 @@ export function WeatherDisplay() {
       reset: true,
     });
   
-    
     useEffect(()=> {
         
         const getWeather =async () => 
