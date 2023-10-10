@@ -85,7 +85,7 @@ export function WeatherDisplay() {
     const [index, setIndex] = useState(0);
     const props = useSpring({
       from: { opacity: 0, transform: 'rotate(180deg)' },
-      to: async (next) => {
+      to: async (next: (props: object) => Promise<void>) => {
         while (1) {
           await next({ opacity: 1, transform: 'rotate(0deg)', config: config.gentle });
           setIndex((index + 1) % svgs.length); // Change SVG mid-spin
