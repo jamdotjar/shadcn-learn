@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { useEffect, useState } from "react";
 import { LineChart, Line, CartesianGrid,Area, XAxis, YAxis, Tooltip, AreaChart } from 'recharts';
-
+import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import { useSpring, animated, config } from 'react-spring';
 import Image from "next/image";
 
@@ -80,7 +80,28 @@ export function WeatherDisplay() {
     const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
     const [location, setLocation] = useState<{lat: number | null, lon: number | null, city?: string}>({lat: null, lon: null})
 
+    const [address, setAddress] = useState("");
+    const [showLocationPicker, setShowLocationPicker] = useState(false);
+    const getCityName = async (lat: number, lon: number) => {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+        const data = await response.json();
+        return data.address.city;
+    }
 
+
+
+    const handleSelect = async (value) => {
+        try {
+            const results = await geocodeByAddress(value);
+            const latLng = await getLatLng(results[0]);
+            const city = await getCityName(latLng.lat, latLng.lng);
+            setLocation({ lat: latLng.lat, lon: latLng.lng, city });
+            console.log('Updated location:', { lat: latLng.lat, lon: latLng.lng, city }); // Log the updated location
+            setShowLocationPicker(false);
+        } catch (error) {
+            console.error('Error selecting location:', error); // Log any errors
+        }
+    };
     const svgs = ['/cloud.svg', '/sun.svg', '/cloud-rain.svg'];
     const [index, setIndex] = useState(0);
     const props = useSpring({
@@ -123,18 +144,13 @@ export function WeatherDisplay() {
             
         }
         getWeather()
-}, [])
+}, [location.lat, location.lon]);
 useEffect(() => {
-    const getCityName = async (lat: number, lon: number) => {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-        const data = await response.json();
-        return data.address.city;
-    }
 
     if (location.lat && location.lon) {
         getCityName(location.lat, location.lon).then(city => setLocation({ ...location, city }));
     }
-}, [location.lat, location.lon]);
+}, []);
 const currentHour = new Date().getHours();
 
 // Prepare the data for the chart
@@ -157,7 +173,7 @@ const weatherCodeMapping = {
         1: '/cloud.svg', // Partly cloudy
         2: '/cloud.svg', // Cloudy
         3: '/cloud.svg', // Overcast
-        10: '/cloud-drizzle.svg', // Mist
+        10: '/cloud.svg', // Mist
         21: '/cloud-drizzle.svg', // Patchy rain possible
         22: '/cloud-snow.svg', // Patchy snow possible
         23: '/cloud-snow.svg', // Patchy sleet possible
@@ -210,8 +226,38 @@ const currentWeatherImage = weatherCodeToImageMapping[weatherData?.current_weath
 
              {weatherData ? (
                 <>
-               {location.city}
+                <div className="justify-center text-4xl font-semibold text-center">{location.city}</div>
+                <div className="flex flex-wrap justify-center" onClick={() => setShowLocationPicker(true)}> choose another location</div>
+                {showLocationPicker && (
+                    <PlacesAutocomplete
+                        value={address}
+                        onChange={setAddress}
+                        onSelect={handleSelect}
+                    >
+                        {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+                            <div>
+                                <input {...getInputProps({ placeholder: "Type location" })} />
+                                <div>
+                                    {loading ? <div>...loading</div> : null}
+
+                                    {suggestions.map((suggestion) => {
+                                        const style = {
+                                            backgroundColor: suggestion.active ? "#41b6e6" : "#fff"
+                                        };
+
+                                        return (
+                                            <div {...getSuggestionItemProps(suggestion, { style })}>
+                                                {suggestion.description}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </PlacesAutocomplete>
+                )}
                 <div className="flex flex-wrap justify-center">
+
                     <Card className="m-2 text-center">
                         <CardHeader>
                             <CardTitle>
