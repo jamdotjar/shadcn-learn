@@ -37,5 +37,8 @@
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.2.2"
+  },
+  "devDependencies": {
+    "@types/react-places-autocomplete": "^7.2.12"
   }
 }

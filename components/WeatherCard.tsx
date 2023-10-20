@@ -1,7 +1,7 @@
 import { Input } from "postcss";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LineChart, Line, CartesianGrid,Area, XAxis, YAxis, Tooltip, AreaChart } from 'recharts';
 import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import { useSpring, animated, config } from 'react-spring';
@@ -76,7 +76,8 @@ type WeatherData = {
 
 export function WeatherDisplay() {
 
-
+    const searchBarRef = useRef<HTMLDivElement | null>(null);
+    
     const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
     const [location, setLocation] = useState<{lat: number | null, lon: number | null, city?: string}>({lat: null, lon: null})
 
@@ -87,19 +88,25 @@ export function WeatherDisplay() {
         const data = await response.json();
         return data.address.city;
     }
+    
+    const handleClickOutside = (event: MouseEvent) => {
+        if (searchBarRef.current && !searchBarRef.current.contains(event.target as Node)) {
+            setShowLocationPicker(false);
+        }
+    };
 
-
-
-    const handleSelect = async (value) => {
+    const handleSelect = async (value: string) => {
         try {
             const results = await geocodeByAddress(value);
             const latLng = await getLatLng(results[0]);
-            const city = await getCityName(latLng.lat, latLng.lng);
-            setLocation({ lat: latLng.lat, lon: latLng.lng, city });
-            console.log('Updated location:', { lat: latLng.lat, lon: latLng.lng, city }); // Log the updated location
-            setShowLocationPicker(false);
+            setLocation({ lat: latLng.lat, lon: latLng.lng, city: value });
+    
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latLng.lat}&longitude=${latLng.lng}&hourly=temperature_2m,relativehumidity_2m,weathercode,apparent_temperature,precipitation_probability,precipitation&current_weather=true&timezone=America%2FLos_Angeles&forecast_days=3`);
+            const weatherData = await res.json();
+            setShowLocationPicker(false); 
+            setWeatherData(weatherData);
         } catch (error) {
-            console.error('Error selecting location:', error); // Log any errors
+            console.error('Error selecting location:', error);
         }
     };
     const svgs = ['/cloud.svg', '/sun.svg', '/cloud-rain.svg'];
@@ -116,18 +123,16 @@ export function WeatherDisplay() {
       },
       reset: true,
     });
-  
+    
     
     useEffect(()=> {
-        
-        const getWeather =async () => 
-        {
-
+        const getWeather = async () => {
             if ("geolocation" in navigator){
                 navigator.geolocation.getCurrentPosition(async position => {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
-                    setLocation({lat, lon});
+                    const city = await getCityName(lat, lon);
+                    setLocation({lat, lon, city});
                     const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relativehumidity_2m,weathercode,apparent_temperature,precipitation_probability,precipitation&current_weather=true&timezone=America%2FLos_Angeles&forecast_days=3`)
                     const data = await res.json()
                     console.log(data)
@@ -140,16 +145,20 @@ export function WeatherDisplay() {
                 console.log(data)
                 setWeatherData(data)
             }
-            
-            
         }
         getWeather()
-}, [location.lat, location.lon]);
+    }, []);
 useEffect(() => {
 
     if (location.lat && location.lon) {
         getCityName(location.lat, location.lon).then(city => setLocation({ ...location, city }));
     }
+}, []);
+useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+    };
 }, []);
 const currentHour = new Date().getHours();
 
@@ -227,34 +236,47 @@ const currentWeatherImage = weatherCodeToImageMapping[weatherData?.current_weath
              {weatherData ? (
                 <>
                 <div className="justify-center text-4xl font-semibold text-center">{location.city}</div>
-                <div className="flex flex-wrap justify-center" onClick={() => setShowLocationPicker(true)}> choose another location</div>
+                <div className="flex flex-wrap justify-center cursor-pointer" onClick={() => setShowLocationPicker(true)}> choose another location</div>
                 {showLocationPicker && (
-                    <PlacesAutocomplete
-                        value={address}
-                        onChange={setAddress}
-                        onSelect={handleSelect}
-                    >
-                        {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-                            <div>
-                                <input {...getInputProps({ placeholder: "Type location" })} />
-                                <div>
-                                    {loading ? <div>...loading</div> : null}
+                    <div ref={searchBarRef} className="w-full max-w-md mx-auto mt-4 shadow-md rounded-lg overflow-hidden border border-grey-200">
+                        <PlacesAutocomplete
+                            value={address}
+                            onChange={setAddress}
+                            onSelect={handleSelect}
+                        >
+                            {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+                                <div className="p-4">
+                                    <input 
+                                        {...getInputProps({ placeholder: "Type location" })} 
+                                        className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:shadow-outline"
+                                    />
+                                    <div className="mt-2">
+                                        {loading ? <div>...loading</div> : null}
 
-                                    {suggestions.map((suggestion) => {
-                                        const style = {
-                                            backgroundColor: suggestion.active ? "#41b6e6" : "#fff"
-                                        };
+                                        {suggestions.map((suggestion, index) => {
+                                            const style = {
+                                                backgroundColor: suggestion.active ? "#41b6e6" : "#fff",
+                                                padding: '10px',
+                                                cursor: 'pointer',
+                                                borderRadius: '0.6rem',
+                                                transition: 'background-color 0.2s ease-in-out',
+                                                
+                                                ':hover': {
+                                                    backgroundColor: '#f5f5f5'
+                                                }
+                                            };
 
-                                        return (
-                                            <div {...getSuggestionItemProps(suggestion, { style })}>
-                                                {suggestion.description}
-                                            </div>
-                                        );
-                                    })}
+                                            return (
+                                                <div {...getSuggestionItemProps(suggestion, { style })} key={index}>
+                                                    {suggestion.description}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </PlacesAutocomplete>
+                            )}
+                        </PlacesAutocomplete>
+                    </div>
                 )}
                 <div className="flex flex-wrap justify-center">
 
