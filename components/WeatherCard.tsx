@@ -148,12 +148,13 @@ export function WeatherDisplay() {
         }
         getWeather()
     }, []);
-useEffect(() => {
 
-    if (location.lat && location.lon) {
-        getCityName(location.lat, location.lon).then(city => setLocation({ ...location, city }));
-    }
-}, []);
+    useEffect(() => {
+
+        if (location.lat && location.lon) {
+            getCityName(location.lat, location.lon).then(city => setLocation({ ...location, city }));
+        }
+    }, [location]);
 useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
