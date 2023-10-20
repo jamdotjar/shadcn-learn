@@ -27,7 +27,7 @@ export default function Home() {
     <Header/>
     <main className="flex min-h-screen flex-col items-center justify-between mt-20">
       
-      <div className=' w-3/5 h-screen mx-auto flex justify-center'>
+      <div className=' w-3/5 h-screen mx-auto justify-center'>
         <WeatherDisplay/>
       </div>
     </main>
